@@ -1,0 +1,186 @@
+import { chromium } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+import assert from 'node:assert/strict';
+
+const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || 'msedge' });
+try {
+  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: 'reduce' });
+  const galleryPage = await context.newPage();
+  const galleryErrors = [];
+  galleryPage.on('pageerror', (error) => galleryErrors.push(error.message));
+  await galleryPage.goto(new URL('/galeria.html', process.env.TEST_URL || 'http://127.0.0.1:5173').href, { waitUntil: 'networkidle' });
+  const galleryPhotos = galleryPage.locator('[data-work-photo]');
+  assert.equal(await galleryPhotos.count(), 18);
+  await galleryPage.evaluate(async () => {
+    document.querySelectorAll('img').forEach((image) => { image.loading = 'eager'; });
+    await Promise.all([...document.images].map((image) => image.decode()));
+    await document.fonts.ready;
+  });
+  const gallerySources = await galleryPhotos.locator('img').evaluateAll((images) => images.map((image) => image.currentSrc));
+  assert.equal(new Set(gallerySources).size, 18);
+  for (let index = 0; index < 18; index++) {
+    await galleryPhotos.nth(index).click();
+    await galleryPage.locator('#viewer-image').evaluate((image) => image.decode());
+    assert.equal(await galleryPage.locator('#viewer-image').getAttribute('src'), gallerySources[index]);
+    await galleryPage.keyboard.press('ArrowRight');
+    assert.equal(await galleryPage.locator('#viewer-image').getAttribute('src'), gallerySources[(index + 1) % 18]);
+    await galleryPage.keyboard.press('ArrowLeft');
+    assert.equal(await galleryPage.locator('#viewer-image').getAttribute('src'), gallerySources[index]);
+    await galleryPage.keyboard.press('Escape');
+    assert.equal(await galleryPhotos.nth(index).evaluate((button) => document.activeElement === button), true);
+  }
+  for (const width of [1440, 1024, 800, 768, 430, 390, 320]) {
+    await galleryPage.setViewportSize({ width, height: 900 });
+    assert.equal(await galleryPage.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `Gallery overflow at ${width}px`);
+    const galleryAxe = await new AxeBuilder({ page: galleryPage }).analyze();
+    assert.equal(galleryAxe.violations.length, 0, JSON.stringify(galleryAxe.violations.map(({ id, nodes }) => ({ id, targets: nodes.map((node) => node.target) }))));
+  }
+  await galleryPage.locator('.menu-toggle').click();
+  assert.equal(await galleryPage.locator('.menu-toggle').getAttribute('aria-expanded'), 'true');
+  await galleryPage.keyboard.press('Escape');
+  assert.equal(await galleryPage.locator('.menu-toggle').getAttribute('aria-expanded'), 'false');
+  assert.deepEqual(galleryErrors, []);
+  await galleryPage.setViewportSize({ width: 1440, height: 1000 });
+  await galleryPage.screenshot({ path: 'gallery-desktop.png', fullPage: true });
+  await galleryPage.setViewportSize({ width: 390, height: 844 });
+  await galleryPage.screenshot({ path: 'gallery-mobile.png', fullPage: true });
+  await galleryPage.close();
+  console.log('Gallery: 18 photos, viewer, keyboard, mobile menu and accessibility verified.');
+  const page = await context.newPage();
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.goto(process.env.TEST_URL || 'http://127.0.0.1:5173', { waitUntil: 'networkidle' });
+  await page.locator('h1').waitFor();
+  assert.doesNotMatch(await page.locator('body').innerText(), /Barcelona y alrededores/i);
+  assert.equal(await page.locator('[data-project-group]').count(), 4);
+  assert.equal(await page.locator('[data-project-group="0"] [data-project-photo]').count(), 4);
+  assert.equal(await page.locator('[data-sample-photo]').count(), 5);
+  assert.equal(await page.locator('#inspiracion, [data-gallery], a[href="#inspiracion"]').count(), 0);
+  assert.match(await page.locator('.hero-description').textContent(), /viviendas, locales y oficinas/);
+  const brokenAnchors = await page.locator('a[href^="#"]').evaluateAll((links) => links.filter((link) => !document.getElementById(link.hash.slice(1))).map((link) => link.hash));
+  assert.deepEqual(brokenAnchors, []);
+  await page.evaluate(async () => {
+    document.querySelectorAll('img').forEach((image) => { image.loading = 'eager'; });
+    await Promise.all([...document.images].map((image) => image.decode().catch(() => {})));
+    await document.fonts.ready;
+  });
+  const images = await page.locator('img').evaluateAll((items) => items.map((image) => ({ src: image.src, loaded: image.complete && image.naturalWidth > 0 })));
+  assert.ok(images.length >= 10, `Expected at least 10 images, found ${images.length}: ${images.map((image) => image.src).join(', ')}`);
+  assert.ok(images.every((image) => image.loaded), `Broken images: ${JSON.stringify(images.filter((image) => !image.loaded))}`);
+  const uniqueSrcs = new Set(images.map((image) => image.src));
+  assert.ok(uniqueSrcs.size >= 9, `Expected at least 9 unique image srcs, found ${uniqueSrcs.size}`);
+  const externalImages = images.filter((image) => new URL(image.src).origin !== new URL(page.url()).origin);
+  assert.equal(externalImages.length, 0, `Expected no external images, found ${externalImages.length}`);
+  await page.screenshot({ path: 'preview-desktop.png', fullPage: true });
+  const firstGroup = page.locator('[data-project-group="0"]');
+  for (let index = 0; index < 4; index++) {
+    const thumbnail = firstGroup.locator('[data-project-photo]').nth(index);
+    await thumbnail.click();
+    assert.equal(await thumbnail.getAttribute('aria-pressed'), 'true');
+    assert.equal(await firstGroup.locator('[data-project-image]').getAttribute('src'), await thumbnail.locator('img').evaluate((image) => image.currentSrc));
+    await firstGroup.locator('[data-project-expand]').click();
+    await page.locator('#viewer-image').evaluate((image) => image.decode());
+    assert.equal(await page.locator('#dialog-title').textContent(), await thumbnail.getAttribute('data-caption'));
+    await page.keyboard.press('Escape');
+  }
+  await firstGroup.locator('[data-project-photo]').first().click();
+  await firstGroup.locator('[data-project-photo]').first().press('ArrowRight');
+  assert.equal(await firstGroup.locator('[data-project-photo]').nth(1).getAttribute('aria-pressed'), 'true');
+  await firstGroup.locator('[data-project-photo]').first().click();
+  await page.locator('.project-next').click();
+  await page.waitForTimeout(500);
+  const secondGroup = page.locator('[data-project-group="1"]');
+  await secondGroup.locator('[data-project-photo]').nth(1).click();
+  assert.equal(await secondGroup.locator('[data-project-photo]').nth(1).getAttribute('aria-pressed'), 'true');
+  await page.locator('.project-next').click();
+  await page.waitForTimeout(500);
+  const thirdGroup = page.locator('[data-project-group="2"]');
+  await thirdGroup.locator('[data-project-expand]').click();
+  await page.locator('#viewer-image').evaluate((image) => image.decode());
+  await page.keyboard.press('Escape');
+  await page.locator('.project-prev').click();
+  await page.waitForTimeout(500);
+  await page.locator('.project-prev').click();
+  await page.waitForTimeout(500);
+  for (let index = 0; index < 5; index++) {
+    await page.locator('[data-sample-photo]').nth(index).click();
+    await page.locator('#viewer-image').evaluate((image) => image.decode());
+    assert.equal(await page.locator('#dialog-title').textContent(), `Muestrario 0${index + 1}`);
+    await page.keyboard.press('Escape');
+    assert.equal(await page.locator('[data-sample-photo]').nth(index).evaluate((element) => element === document.activeElement), true);
+  }
+  await page.locator('[data-sample-photo]').first().click();
+  await page.keyboard.press('ArrowLeft');
+  assert.equal(await page.locator('#dialog-title').textContent(), 'Muestrario 05');
+  await page.locator('#viewer-next').click();
+  assert.equal(await page.locator('#dialog-title').textContent(), 'Muestrario 01');
+  const viewerAxe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
+  assert.equal(viewerAxe.violations.length, 0, JSON.stringify(viewerAxe.violations.map((v) => ({ id: v.id, nodes: v.nodes.map((n) => n.target) }))));
+  await page.keyboard.press('Escape');
+  await page.locator('[data-prefill-service="Pulir y barnizar"]').click();
+  assert.equal(await page.locator('[name="servicio"]').inputValue(), 'Pulir y barnizar');
+  await page.getByRole('tab', { name: 'Nogal cálido' }).click();
+  assert.equal(await page.locator('#material-name').textContent(), 'Nogal cálido');
+  await page.getByRole('tab', { name: 'Nogal cálido' }).press('ArrowRight');
+  assert.equal(await page.locator('#material-name').textContent(), 'Roble claro');
+  await page.getByRole('tab', { name: 'Roble natural' }).click();
+  await page.locator('[data-service="restauracion"]').click();
+  await page.getByRole('dialog').waitFor({ state: 'visible' });
+  await page.locator('#dialog-quote').click();
+  assert.equal(await page.locator('[name="servicio"]').inputValue(), 'Restauración de parquet');
+  await page.locator('[name="nombre"]').fill('Anna');
+  await page.locator('[name="poblacion"]').fill('Barcelona');
+  await page.locator('.form-extras summary').click();
+  await page.locator('[name="superficie"]').fill('75');
+  await page.locator('[name="mensaje"]').fill('Quiero restaurar mi parquet & darle un acabado mate.');
+  await page.locator('.submit-button').click();
+  const quoteUrl = new URL(await page.locator('#whatsapp-ready').getAttribute('href'));
+  assert.match(quoteUrl.searchParams.get('text'), /Superficie aproximada: 75 m²/);
+  assert.match(quoteUrl.searchParams.get('text'), /Restauración de parquet/);
+  assert.match(await page.locator('#form-status').textContent(), /Todavía no se ha enviado/);
+  await page.locator('[name="nombre"]').fill('Ana');
+  assert.equal(await page.locator('#whatsapp-ready').isVisible(), false);
+  await page.locator('.faq-list summary').first().click();
+  assert.equal(await page.locator('.faq-list details').first().getAttribute('open'), '');
+  await page.locator('[data-service="instalacion"]').click();
+  await page.getByRole('dialog').waitFor({ state: 'visible' });
+  const dialogAxe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
+  assert.equal(dialogAxe.violations.length, 0, JSON.stringify(dialogAxe.violations.map((v) => ({ id: v.id, nodes: v.nodes.map((n) => n.target) }))));
+  await page.keyboard.press('Escape');
+  for (const key of ['aviso', 'privacidad', 'cookies']) {
+    await page.locator(`.footer [data-legal="${key}"]`).click();
+    await page.getByRole('dialog').waitFor({ state: 'visible' });
+    assert.doesNotMatch(await page.getByRole('dialog').innerText(), /Barcelona y alrededores|Unsplash/i);
+    await page.keyboard.press('Escape');
+  }
+  const accessibility = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
+  assert.equal(accessibility.violations.length, 0, JSON.stringify(accessibility.violations.map((v) => ({ id: v.id, nodes: v.nodes.map((n) => ({ target: n.target, summary: n.failureSummary })) }))));
+  for (const width of [320, 375, 390, 768, 800, 801, 900, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `Horizontal overflow at ${width}px`);
+    const smallText = await page.locator('.hero-description, .body-copy, .service-card > p:not(.service-kicker), .process-steps p, .faq-list summary, .faq-list details > p, .quote-form input, .quote-form select, .quote-form textarea').evaluateAll((elements) => elements.filter((element) => parseFloat(getComputedStyle(element).fontSize) < 16).map((element) => element.className || element.tagName));
+    assert.deepEqual(smallText, [], `Body and input text must be at least 16px at ${width}px`);
+    assert.equal(await page.locator('h1').evaluate((element) => getComputedStyle(element).fontWeight), '600');
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.getByRole('button', { name: 'Abrir menú', exact: true }).click();
+  assert.equal(await page.locator('.menu-toggle').getAttribute('aria-expanded'), 'true');
+  await page.locator('#navigation a[href="#servicios-lista"]').click();
+  assert.equal(await page.locator('.menu-toggle').getAttribute('aria-expanded'), 'false');
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: 'preview-mobile.png', fullPage: true });
+  const mobileAxe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
+  assert.equal(mobileAxe.violations.length, 0, JSON.stringify(mobileAxe.violations.map((v) => ({ id: v.id, nodes: v.nodes.map((n) => ({ target: n.target, summary: n.failureSummary })) }))));
+  await page.locator('[data-sample-photo]').last().click();
+  await page.locator('#viewer-image').evaluate((image) => image.decode());
+  assert.equal(await page.locator('#dialog-title').textContent(), 'Muestrario 05');
+  assert.ok(await page.getByRole('dialog').evaluate((element) => element.scrollWidth <= element.clientWidth));
+  const mobileViewerAxe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
+  assert.equal(mobileViewerAxe.violations.length, 0, JSON.stringify(mobileViewerAxe.violations.map((v) => v.id)));
+  await page.keyboard.press('Escape');
+  assert.deepEqual(errors, []);
+  console.log('Verified: location labels removed, nine local photos, project thumbnails, five sample viewers, photo keyboard navigation and focus restoration, preserved tone selector, valid anchors, quote form, legal dialogs, minimum 16px body text, nine viewport widths, desktop/mobile/dialog accessibility, no JavaScript errors.');
+} finally {
+  await browser.close();
+}

@@ -1,0 +1,23 @@
+{
+  "name": "mm-parquet",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Web de MM Parquet — instalación y restauración de parquet en Barcelona",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.10.2",
+    "@playwright/test": "1.58.2",
+    "lightningcss": "^1.33.0",
+    "sharp": "^0.35.4",
+    "vite": "7.3.6"
+  },
+  "dependencies": {
+    "@fontsource/dm-sans": "5.2.6"
+  }
+}

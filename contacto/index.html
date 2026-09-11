@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+<head>
+<!--@include partials/head.html-->
+  <title>Contacto y presupuesto | MM Parquet</title>
+  <meta name="description" content="Pide presupuesto sin compromiso a MM Parquet: teléfono, WhatsApp y correo. Sabadell, Barcelona y cercanías. Indícanos población, metros aproximados y qué necesitas." />
+  <meta property="og:title" content="Contacto y presupuesto | MM Parquet" />
+  <meta property="og:description" content="Teléfono, WhatsApp y correo de MM Parquet. Presupuesto sin compromiso." />
+  <link rel="canonical" href="https://www.mmparquet.com/contacto/" />
+  <meta property="og:url" content="https://www.mmparquet.com/contacto/" />
+</head>
+<body>
+<!--@include partials/header.html-->
+  <main id="contenido">
+    <header class="page-head">
+      <div class="wrap">
+        <p class="kicker">Contacto</p>
+        <h1>Cuéntanos qué necesita tu parquet.</h1>
+        <p class="lead">¿Quieres cambiar el parquet, recuperar el que ya tienes, forrar una escalera o poner tarima en la terraza? Escríbenos con la población, los metros aproximados y unas fotografías, y te decimos qué haríamos y cuánto costaría. Te responde directamente quien va a hacer el trabajo.</p>
+      </div>
+    </header>
+
+    <section class="section wrap contact-layout" id="contacto" aria-label="Datos de contacto y formulario">
+      <div class="contact-info">
+        <div class="contact-block">
+          <h2>Teléfono y WhatsApp</h2>
+          <a class="contact-phone" href="tel:+34678906586">678 906 586</a>
+          <a class="text-link" href="https://wa.me/34678906586?text=Hola%2C%20MM%20Parquet.%20Me%20gustar%C3%ADa%20consultaros%20sobre%20un%20proyecto." target="_blank" rel="noopener noreferrer">Escribir por WhatsApp</a>
+        </div>
+        <div class="contact-block">
+          <h2>Correo</h2>
+          <a href="mailto:info@mmparquet.com">info@mmparquet.com</a>
+        </div>
+        <div class="contact-block">
+          <h2>Zona de trabajo</h2>
+          <p>Sabadell, Barcelona y cercanías.</p>
+        </div>
+      </div>
+      <form class="quote-form" id="quote-form">
+        <h2>Solicitar presupuesto</h2>
+        <p class="form-intro">Rellena los datos y prepara tu consulta por WhatsApp. Sin compromiso y sin registrarte. Si puedes, adjunta fotos del parquet en el mensaje.</p>
+        <div class="form-row">
+          <label>Nombre <span>*</span><input name="nombre" autocomplete="given-name" placeholder="Tu nombre" maxlength="80" required></label>
+          <label>Población <span>*</span><input name="poblacion" autocomplete="address-level2" placeholder="¿Dónde está la obra?" maxlength="100" required></label>
+        </div>
+        <p class="field-error" data-error="nombre">Escribe tu nombre.</p>
+        <p class="field-error" data-error="poblacion">Escribe la población de la obra.</p>
+        <label>Servicio <span>*</span><select name="servicio" required><option value="">Selecciona un servicio</option><option>Instalación de parquet</option><option>Restauración de parquet</option><option>Pulido y barnizado</option><option>Parquet natural</option><option>Tarima de exterior</option><option>Escaleras</option><option>Otro</option></select></label>
+        <p class="field-error" data-error="servicio">Selecciona un servicio.</p>
+        <label>Metros aproximados (m²)<input name="superficie" type="number" min="1" max="100000" step="1" placeholder="Ej. 60" inputmode="numeric"></label>
+        <label>Descripción del trabajo<textarea name="mensaje" rows="4" maxlength="1500" placeholder="Estado del parquet, acceso, fecha…"></textarea></label>
+        <p class="form-privacy">Tus datos no se guardan aquí: se pasan a WhatsApp para que revises el mensaje y decidas si lo envías. <button type="button" class="inline-link" data-legal="privacidad">Ver privacidad</button>.</p>
+        <button class="btn btn-solid submit-button" type="submit">Preparar consulta por WhatsApp</button>
+        <p class="form-status" role="status" id="form-status"></p>
+        <a class="whatsapp-ready" id="whatsapp-ready" target="_blank" rel="noopener noreferrer" hidden>Abrir mi consulta en WhatsApp</a>
+      </form>
+    </section>
+  </main>
+<!--@include partials/footer.html-->
+</body>
+</html>

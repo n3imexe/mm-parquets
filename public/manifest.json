@@ -1,0 +1,14 @@
+{
+  "name": "MM Parquet",
+  "short_name": "MM Parquet",
+  "description": "Instalación y restauración de parquet. Más de 23 años de oficio en Sabadell, Barcelona y cercanías.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#30251d",
+  "theme_color": "#30251d",
+  "lang": "es",
+  "icons": [
+    { "src": "/favicon-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}
