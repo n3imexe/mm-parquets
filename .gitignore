@@ -26,3 +26,6 @@ Thumbs.db
 # Environment
 .env
 .env.local
+
+# Local backup folder (not part of the site)
+backup_original_2026/
