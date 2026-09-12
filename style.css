@@ -647,8 +647,8 @@ dialog .legal-pending { background: #ece3d6; padding: 16px; color: #5e4834; marg
 .wrap { max-width: 1200px; margin: auto; padding-left: 5.5%; padding-right: 5.5%; }
 
 .site-header { position: sticky; top: 0; z-index: 20; background: var(--paper); border-bottom: 1px solid #ddd6cc70; }
-.site-header .header-inner { display: flex; align-items: center; justify-content: space-between; gap: 32px; min-height: 92px; padding-top: 12px; padding-bottom: 12px; position: relative; }
-.site-header .brand-logo { height: 66px; max-width: 230px; }
+.site-header .header-inner { display: flex; align-items: center; justify-content: space-between; gap: 32px; min-height: 104px; padding-top: 14px; padding-bottom: 14px; position: relative; }
+.site-header .brand-logo { height: 78px; max-width: 250px; }
 .site-nav { display: flex; align-items: center; gap: 30px; }
 .site-nav > a { font-size: 15.5px; font-weight: 500; color: var(--dark); padding: 10px 0; position: relative; transition: color .2s; white-space: nowrap; }
 .site-nav > a:hover { color: #785638; }
@@ -774,8 +774,8 @@ dialog .legal-pending { background: #ece3d6; padding: 16px; color: #5e4834; marg
   .header-phone, .site-header .header-cta { display: none; }
 }
 @media (max-width: 1024px) {
-  .site-header .header-inner { min-height: 78px; }
-  .site-header .brand-logo { height: 54px; }
+  .site-header .header-inner { min-height: 92px; }
+  .site-header .brand-logo { height: 68px; }
   .site-header .menu-toggle { display: flex !important; flex-direction: column; gap: 6px; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 5px; flex-shrink: 0; }
   .site-header .menu-toggle span { width: 24px; height: 2px; background: var(--dark); transition: transform .2s; }
   .site-header .menu-toggle[aria-expanded=true] span:first-child { transform: translateY(4px) rotate(45deg); }
