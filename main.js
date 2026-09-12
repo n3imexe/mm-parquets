@@ -37,7 +37,7 @@ document.addEventListener('keydown', (event) => {
   }
 });
 document.addEventListener('click', (event) => {
-  if (!event.target.closest('.header')) closeMenu();
+  if (!event.target.closest('.header, .site-header')) closeMenu();
 });
 window.matchMedia('(min-width: 801px)').addEventListener('change', (event) => {
   if (event.matches) closeMenu();
@@ -140,7 +140,7 @@ document.querySelectorAll('.project-viewer').forEach((viewer) => {
     const photoImage = photo.querySelector('img');
     image.src = photoImage.currentSrc || photoImage.src;
     image.alt = photoImage.alt;
-    caption.textContent = `${photoNumber(index)} / ${String(photos.length).padStart(2, '0')} — ${photo.dataset.caption}`;
+    if (caption) caption.textContent = `${photoNumber(index)} / ${String(photos.length).padStart(2, '0')} — ${photo.dataset.caption}`;
     photos.forEach((button, i) => button.setAttribute('aria-pressed', String(i === index)));
   }
   photos.forEach((button, i) => {
@@ -202,11 +202,15 @@ document.querySelectorAll('[data-compare-gallery]').forEach((gallery) => {
     gallery.querySelectorAll('[data-compare-open]').forEach((button) => button.addEventListener('click', () => openPhoto(photoNodes, 0, 'Antes y después de una restauración de MM Parquet.')));
   }
   const slider = gallery.querySelector('[data-compare-slider]');
-  if (slider) initCompareSlider(slider, gallery);
+  if (slider) initCompareSlider(slider);
 });
-function initCompareSlider(slider, gallery) {
-  const before = slider.querySelector('.compare-slider-before');
-  const handle = slider.querySelector('.compare-slider-handle');
+document.querySelectorAll('[data-compare-slider]').forEach((slider) => {
+  if (!slider.closest('[data-compare-gallery]')) initCompareSlider(slider);
+});
+function initCompareSlider(slider) {
+  const before = slider.querySelector('.compare-slider-before, .compare-before');
+  const handle = slider.querySelector('.compare-slider-handle, .compare-handle');
+  if (!before || !handle) return;
   let dragging = false;
   let percent = 50;
   function setPos(p) {
@@ -358,6 +362,9 @@ document.querySelectorAll('[data-legal]').forEach((button) => {
 });
 const form = $('#quote-form');
 const readyLink = $('#whatsapp-ready');
+const serviceParam = new URLSearchParams(location.search).get('servicio');
+const serviceField = document.querySelector('[name="servicio"]');
+if (serviceParam && serviceField) serviceField.value = serviceParam;
 document.querySelectorAll('[data-prefill-service]').forEach((link) => {
   link.addEventListener('click', () => {
     $('[name="servicio"]').value = link.dataset.prefillService;
