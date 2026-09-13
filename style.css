@@ -747,7 +747,7 @@ dialog .legal-pending { background: #ece3d6; padding: 16px; color: #5e4834; marg
 .split-copy > p + p { margin-top: 18px; }
 .split-copy .text-link { margin-top: 26px; }
 .split-figure { margin: 0; }
-.split-figure img { width: 100%; aspect-ratio: 4 / 4.4; object-fit: cover; border-radius: 2px; }
+.split-figure img { width: 100%; height: auto; aspect-ratio: 4 / 4.4; object-fit: cover; border-radius: 2px; }
 .about .split-figure img { aspect-ratio: 4 / 4.8; }
 .finish-criteria { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 36px; }
 .criterion h3 { font-size: 18px; font-weight: 600; letter-spacing: -.3px; margin-bottom: 10px; }
