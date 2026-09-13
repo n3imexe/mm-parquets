@@ -17,6 +17,29 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="preconnect" href="https://wa.me" crossorigin />
   <link rel="manifest" href="/manifest.json" />
+  <link rel="preload" as="image" href="/fotos/logo-mm-parquet.webp" fetchpriority="high" />
+  <style>
+    .first-loader { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; background: #f7f5f0; transition: opacity .4s ease; }
+    .first-loader.hide { opacity: 0; pointer-events: none; }
+    .first-loader img { width: 200px; max-width: 50vw; height: auto; opacity: .9; }
+  </style>
+  <script>
+    (function () {
+      try {
+        if (sessionStorage.getItem('mm-loaded')) return;
+      } catch (e) {}
+      document.write('<div class="first-loader" id="first-loader"><img src="/fotos/logo-mm-parquet.webp" alt="MM Parquet"></div>');
+      window.addEventListener('load', function () {
+        var l = document.getElementById('first-loader');
+        if (!l) return;
+        setTimeout(function () {
+          l.classList.add('hide');
+          setTimeout(function () { l.remove(); }, 500);
+        }, 400);
+        try { sessionStorage.setItem('mm-loaded', '1'); } catch (e) {}
+      });
+    })();
+  </script>
   <!-- Google tag (gtag.js), sin cookies hasta que se acepten en el aviso de cookies -->
   <script>
     window.dataLayer = window.dataLayer || [];
