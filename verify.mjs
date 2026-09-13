@@ -6,51 +6,18 @@ const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || 
 try {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: 'reduce' });
   const galleryPage = await context.newPage();
-  const galleryErrors = [];
-  galleryPage.on('pageerror', (error) => galleryErrors.push(error.message));
   await galleryPage.goto(new URL('/galeria.html', process.env.TEST_URL || 'http://127.0.0.1:5173').href, { waitUntil: 'networkidle' });
-  const galleryPhotos = galleryPage.locator('[data-work-photo]');
-  assert.equal(await galleryPhotos.count(), 18);
-  await galleryPage.evaluate(async () => {
-    document.querySelectorAll('img').forEach((image) => { image.loading = 'eager'; });
-    await Promise.all([...document.images].map((image) => image.decode()));
-    await document.fonts.ready;
-  });
-  const gallerySources = await galleryPhotos.locator('img').evaluateAll((images) => images.map((image) => image.currentSrc));
-  assert.equal(new Set(gallerySources).size, 18);
-  for (let index = 0; index < 18; index++) {
-    await galleryPhotos.nth(index).click();
-    await galleryPage.locator('#viewer-image').evaluate((image) => image.decode());
-    assert.equal(await galleryPage.locator('#viewer-image').getAttribute('src'), gallerySources[index]);
-    await galleryPage.keyboard.press('ArrowRight');
-    assert.equal(await galleryPage.locator('#viewer-image').getAttribute('src'), gallerySources[(index + 1) % 18]);
-    await galleryPage.keyboard.press('ArrowLeft');
-    assert.equal(await galleryPage.locator('#viewer-image').getAttribute('src'), gallerySources[index]);
-    await galleryPage.keyboard.press('Escape');
-    assert.equal(await galleryPhotos.nth(index).evaluate((button) => document.activeElement === button), true);
-  }
-  for (const width of [1440, 1024, 800, 768, 430, 390, 320]) {
-    await galleryPage.setViewportSize({ width, height: 900 });
-    assert.equal(await galleryPage.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `Gallery overflow at ${width}px`);
-    const galleryAxe = await new AxeBuilder({ page: galleryPage }).analyze();
-    assert.equal(galleryAxe.violations.length, 0, JSON.stringify(galleryAxe.violations.map(({ id, nodes }) => ({ id, targets: nodes.map((node) => node.target) }))));
-  }
-  await galleryPage.locator('.menu-toggle').click();
-  assert.equal(await galleryPage.locator('.menu-toggle').getAttribute('aria-expanded'), 'true');
-  await galleryPage.keyboard.press('Escape');
-  assert.equal(await galleryPage.locator('.menu-toggle').getAttribute('aria-expanded'), 'false');
-  assert.deepEqual(galleryErrors, []);
-  await galleryPage.setViewportSize({ width: 1440, height: 1000 });
-  await galleryPage.screenshot({ path: 'gallery-desktop.png', fullPage: true });
-  await galleryPage.setViewportSize({ width: 390, height: 844 });
-  await galleryPage.screenshot({ path: 'gallery-mobile.png', fullPage: true });
+  assert.match(galleryPage.url(), /\/trabajos\/$/, 'galeria.html debe redirigir a /trabajos/');
   await galleryPage.close();
-  console.log('Gallery: 18 photos, viewer, keyboard, mobile menu and accessibility verified.');
+  console.log('galeria.html redirects to /trabajos/.');
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto(process.env.TEST_URL || 'http://127.0.0.1:5173', { waitUntil: 'networkidle' });
   await page.locator('h1').waitFor();
+  assert.equal(await page.locator('#cookie-banner').isVisible(), true);
+  await page.locator('#cookie-banner [data-cookie-decline]').click();
+  assert.equal(await page.locator('#cookie-banner').isHidden(), true);
   assert.doesNotMatch(await page.locator('body').innerText(), /Barcelona y alrededores/i);
   assert.equal(await page.locator('[data-project-group]').count(), 4);
   assert.equal(await page.locator('[data-project-group="0"] [data-project-photo]').count(), 4);
@@ -148,7 +115,7 @@ try {
   assert.equal(dialogAxe.violations.length, 0, JSON.stringify(dialogAxe.violations.map((v) => ({ id: v.id, nodes: v.nodes.map((n) => n.target) }))));
   await page.keyboard.press('Escape');
   for (const key of ['aviso', 'privacidad', 'cookies']) {
-    await page.locator(`.footer [data-legal="${key}"]`).click();
+    await page.locator(`.site-footer [data-legal="${key}"]`).click();
     await page.getByRole('dialog').waitFor({ state: 'visible' });
     assert.doesNotMatch(await page.getByRole('dialog').innerText(), /Barcelona y alrededores|Unsplash/i);
     await page.keyboard.press('Escape');
@@ -166,7 +133,7 @@ try {
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.getByRole('button', { name: 'Abrir menú', exact: true }).click();
   assert.equal(await page.locator('.menu-toggle').getAttribute('aria-expanded'), 'true');
-  await page.locator('#navigation a[href="#servicios-lista"]').click();
+  await page.keyboard.press('Escape');
   assert.equal(await page.locator('.menu-toggle').getAttribute('aria-expanded'), 'false');
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: 'preview-mobile.png', fullPage: true });

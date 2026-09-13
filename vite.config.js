@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 
 const root = process.cwd();
-const pages = ['index', 'galeria', 'servicios/index', 'trabajos/index', 'acabados/index', 'sobre-mm-parquet/index', 'preguntas-frecuentes/index', 'contacto/index'];
+const pages = ['index', 'galeria', 'servicios/index', 'trabajos/index', 'acabados/index', 'sobre-mm-parquet/index', 'preguntas-frecuentes/index', 'contacto/index', '404'];
 
 function partials() {
   return {

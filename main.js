@@ -1,18 +1,6 @@
 import './style.css';
 import { buildQuoteMessage, buildWhatsAppUrl } from './quote.js';
 
-window.addEventListener('load', () => {
-  const loader = document.getElementById('page-loader');
-  if (!loader) return;
-  setTimeout(() => loader.classList.add('hide'), 600);
-});
-if (document.readyState === 'complete') {
-  const loader = document.getElementById('page-loader');
-  if (loader && !loader.classList.contains('hide')) {
-    setTimeout(() => loader.classList.add('hide'), 600);
-  }
-}
-
 const $ = (selector) => document.querySelector(selector);
 const menuButton = $('.menu-toggle');
 const navigation = $('#navigation');
@@ -349,10 +337,35 @@ if (sampleCarousel && sampleDots) {
   restartTimer();
 }
 
+const cookieBanner = $('#cookie-banner');
+if (cookieBanner) {
+  const consent = localStorage.getItem('cookie-consent');
+  const updateConsent = (granted) => {
+    if (typeof window.gtag === 'function') {
+      window.gtag('consent', 'update', { analytics_storage: granted ? 'granted' : 'denied' });
+    }
+  };
+  if (consent === 'granted') {
+    updateConsent(true);
+  } else if (consent !== 'denied') {
+    cookieBanner.hidden = false;
+  }
+  cookieBanner.querySelector('[data-cookie-accept]').addEventListener('click', () => {
+    localStorage.setItem('cookie-consent', 'granted');
+    updateConsent(true);
+    cookieBanner.hidden = true;
+  });
+  cookieBanner.querySelector('[data-cookie-decline]').addEventListener('click', () => {
+    localStorage.setItem('cookie-consent', 'denied');
+    updateConsent(false);
+    cookieBanner.hidden = true;
+  });
+}
+
 const legal = {
   aviso: { title: 'Aviso legal', body: '<p>Esta web presenta los servicios de MM Parquet. Contacto: 678 906 586 · info@mmparquet.com.</p><p>La información sobre materiales, tonos y servicios es orientativa. Los trabajos y sus condiciones se concretan en un presupuesto individual. Las fotografías de la escalera corresponden a una misma instalación aportada por la empresa. Los muestrarios se muestran por separado y no equivalen a las simulaciones de tonos del selector.</p><p class="legal-pending">Versión de presentación pendiente de publicación: faltan la razón social o nombre del titular, NIF/CIF, domicilio y, si procede, datos registrales. Este aviso debe completarse y revisarse antes del lanzamiento comercial.</p>' },
-  privacidad: { title: 'Tu privacidad importa.', body: '<p>El formulario prepara un mensaje en tu navegador. Esta web no almacena sus campos ni los envía a un servidor propio. No incluyas información sensible.</p><p>Al abrir la consulta en WhatsApp, los datos del mensaje se incorporan al enlace de ese servicio. Tú revisas el texto y decides si lo envías. El tratamiento posterior está sujeto a las condiciones de WhatsApp y a la gestión que haga la empresa de tu consulta. También puedes contactar por teléfono o correo.</p><p>Las fotografías y las tipografías se sirven desde esta web, sin solicitudes a bancos de imágenes externos. No se ha integrado analítica ni publicidad.</p><p class="legal-pending">Antes de publicar hay que identificar al responsable del tratamiento y completar la política con las bases jurídicas, plazos de conservación, destinatarios, transferencias cuando proceda y vías para ejercer tus derechos, incluido reclamar ante la AEPD.</p>' },
-  cookies: { title: 'Sin cookies innecesarias.', body: '<p>Esta versión no instala cookies propias, no utiliza almacenamiento local y no incorpora herramientas de analítica, publicidad ni seguimiento.</p><p>Los enlaces a WhatsApp abren un servicio externo que aplica sus propias condiciones y política de cookies.</p><p>Si se añaden mapas, vídeos, analítica u otras integraciones, será necesario revisar esta información y gestionar el consentimiento cuando corresponda.</p>' },
+  privacidad: { title: 'Tu privacidad importa.', body: '<p>El formulario prepara un mensaje en tu navegador. Esta web no almacena sus campos ni los envía a un servidor propio. No incluyas información sensible.</p><p>Al abrir la consulta en WhatsApp, los datos del mensaje se incorporan al enlace de ese servicio. Tú revisas el texto y decides si lo envías. El tratamiento posterior está sujeto a las condiciones de WhatsApp y a la gestión que haga la empresa de tu consulta. También puedes contactar por teléfono o correo.</p><p>Las fotografías y las tipografías se sirven desde esta web, sin solicitudes a bancos de imágenes externos.</p><p>Usamos Google Analytics para medir visitas, únicamente si aceptas el aviso de cookies. Puedes cambiar tu decisión en cualquier momento borrando las cookies del navegador y volviendo a cargar la página.</p><p class="legal-pending">Antes de publicar hay que identificar al responsable del tratamiento y completar la política con las bases jurídicas, plazos de conservación, destinatarios, transferencias cuando proceda y vías para ejercer tus derechos, incluido reclamar ante la AEPD.</p>' },
+  cookies: { title: 'Cookies.', body: '<p>Esta web no instala cookies propias ni usa almacenamiento local salvo para recordar tu decisión sobre este aviso.</p><p>Con tu permiso, usamos Google Analytics (cookies de terceros) para saber cuántas personas visitan la web y qué páginas ven. No se activa hasta que pulsas "Aceptar" en el aviso de cookies; si pulsas "Rechazar", no se cargan.</p><p>Los enlaces a WhatsApp abren un servicio externo que aplica sus propias condiciones y política de cookies.</p><p>Si se añaden mapas, vídeos u otras integraciones, será necesario revisar esta información y el consentimiento correspondiente.</p>' },
 };
 document.querySelectorAll('[data-legal]').forEach((button) => {
   button.addEventListener('click', () => {

@@ -8,6 +8,7 @@ dist/
 preview-*.png
 gallery-*.png
 *-check.png
+check-*.png
 
 # Logs
 *.log

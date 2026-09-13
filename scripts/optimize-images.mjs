@@ -19,6 +19,7 @@ const photosDir = path.resolve('fotos');
 const files = (await readdir(photosDir)).filter((file) => file.toLowerCase().endsWith('.jpg'));
 
 let savedTotal = 0;
+let webpTotal = 0;
 for (const file of files) {
   const filePath = path.join(photosDir, file);
   const sourceBuffer = await readFile(filePath);
@@ -40,6 +41,14 @@ for (const file of files) {
   } else {
     console.log(`${file}: ya optimizado (${(before / 1024).toFixed(0)} KB)`);
   }
+
+  const webpPath = filePath.replace(/\.jpg$/i, '.webp');
+  const webpPipeline = metadata.width > maxWidth ? sharp(sourceBuffer).resize({ width: maxWidth }) : sharp(sourceBuffer);
+  const webpBuffer = await webpPipeline.webp({ quality: 76 }).toBuffer();
+  await writeWithRetry(webpPath, webpBuffer);
+  webpTotal += webpBuffer.length;
+  console.log(`${file}: webp generado (${(webpBuffer.length / 1024).toFixed(0)} KB)`);
   await wait(200);
 }
-console.log(`\nAhorro total: ${(savedTotal / 1024 / 1024).toFixed(2)} MB`);
+console.log(`\nAhorro total JPEG: ${(savedTotal / 1024 / 1024).toFixed(2)} MB`);
+console.log(`Peso total WebP generado: ${(webpTotal / 1024 / 1024).toFixed(2)} MB`);

@@ -4,8 +4,8 @@
   "description": "Instalación y restauración de parquet. Más de 23 años de oficio en Sabadell, Barcelona y cercanías.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#30251d",
-  "theme_color": "#30251d",
+  "background_color": "#f7f5f0",
+  "theme_color": "#f7f5f0",
   "lang": "es",
   "icons": [
     { "src": "/favicon-192x192.png", "sizes": "192x192", "type": "image/png" },
