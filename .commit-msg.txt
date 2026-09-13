@@ -1,0 +1,9 @@
+Navbar a ancho completo y ajustes moviles
+
+- Header y topbar usan max-width 1600px en lugar de 1200px para aprovechar mas ancho.
+- Ajustes de logo y header en 520px y 360px para telefonos pequenos.
+- Verificacion pasada en 9 anchos de pantalla.
+
+Generated with [Devin](https://devin.ai)
+
+Co-Authored-By: Devin <158243242+devin-ai-integration[bot]@users.noreply.github.com>

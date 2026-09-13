@@ -77,7 +77,7 @@ p { line-height: 1.75; }
 @keyframes float-pulse { 0% { transform: scale(1); opacity: .6; } 100% { transform: scale(1.5); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .float-whatsapp::after { animation: none; } }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
-.topbar { background: var(--dark); color: #eee1d0; display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 10px 4%; font-size: 13px; font-weight: 500; letter-spacing: .8px; }
+.topbar { background: var(--dark); color: #eee1d0; display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 10px 4%; font-size: 13px; font-weight: 500; letter-spacing: .8px; max-width: 1600px; margin: auto; }
 .topbar a { letter-spacing: .2px; transition: color .2s; padding: 4px 0; min-height: 24px; display: inline-flex; align-items: center; }
 .topbar a:hover { color: #fff; }
 .topbar-divider { margin: 0 14px; color: #baa184; }
@@ -660,7 +660,7 @@ dialog .legal-pending { background: #ece3d6; padding: 16px; color: #5e4834; marg
 .wrap { max-width: 1200px; margin: auto; padding-left: 5.5%; padding-right: 5.5%; }
 
 .site-header { position: sticky; top: 0; z-index: 20; background: var(--paper); border-bottom: 1px solid #ddd6cc70; }
-.site-header .header-inner { display: flex; align-items: center; justify-content: space-between; gap: 32px; min-height: 104px; padding-top: 14px; padding-bottom: 14px; position: relative; }
+.site-header .header-inner { display: flex; align-items: center; justify-content: space-between; gap: 32px; min-height: 104px; padding-top: 14px; padding-bottom: 14px; position: relative; max-width: 1600px; margin: auto; padding-left: 4%; padding-right: 4%; }
 .site-header .brand-logo { height: 78px; max-width: 250px; }
 .site-nav { display: flex; align-items: center; gap: 30px; }
 .site-nav > a { font-size: 15.5px; font-weight: 500; color: var(--dark); padding: 10px 0; position: relative; transition: color .2s; white-space: nowrap; }
@@ -847,8 +847,19 @@ dialog .legal-pending { background: #ece3d6; padding: 16px; color: #5e4834; marg
   .service-index ol { gap: 8px 18px; }
   .how-list { grid-template-columns: 1fr; }
   .contact-next-grid { grid-template-columns: 1fr; }
+  .site-header .header-inner { min-height: 80px; gap: 16px; }
+  .site-header .brand-logo { height: 56px; max-width: 180px; }
+  .site-nav { padding: 14px 5% 20px; }
+  .site-nav > a { font-size: 16px; padding: 12px 0; }
+  .nav-mobile-actions a { font-size: 15px; padding: 9px 0; }
   .compare-table { gap: 10px; }
   .contact-block .contact-phone, .contact-strip .contact-phone { font-size: 26px; }
   .contact-block > a { font-size: 18px; }
   .site-footer .footer-inner { grid-template-columns: 1fr; gap: 30px; }
+}
+@media (max-width: 360px) {
+  .site-header .header-inner { min-height: 72px; gap: 12px; padding-left: 3%; padding-right: 3%; }
+  .site-header .brand-logo { height: 48px; max-width: 150px; }
+  .topbar { padding: 8px 3%; font-size: 11px; }
+  .topbar a { font-size: 11px; }
 }
