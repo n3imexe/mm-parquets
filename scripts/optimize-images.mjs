@@ -1,5 +1,5 @@
 import sharp from 'sharp';
-import { readdir, readFile, writeFile } from 'node:fs/promises';
+import { readdir, readFile, writeFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -26,9 +26,15 @@ for (const file of files) {
   const before = sourceBuffer.length;
   const image = sharp(sourceBuffer);
   const metadata = await image.metadata();
-  const maxWidth = 2000;
+  
+  // Hero: max 1600px wide. Other photos: max 1440px.
+  const isHero = file.startsWith('hero-');
+  const maxWidth = isHero ? 1600 : 1440;
   const pipeline = metadata.width > maxWidth ? image.resize({ width: maxWidth }) : image;
-  const buffer = await pipeline.jpeg({ quality: 78, mozjpeg: true }).toBuffer();
+  
+  // JPEG: quality 72 for photos, 65 for hero
+  const jpegQuality = isHero ? 65 : 72;
+  const buffer = await pipeline.jpeg({ quality: jpegQuality, mozjpeg: true }).toBuffer();
   if (buffer.length < before) {
     try {
       await writeWithRetry(filePath, buffer);
@@ -42,10 +48,11 @@ for (const file of files) {
     console.log(`${file}: ya optimizado (${(before / 1024).toFixed(0)} KB)`);
   }
 
-  const webpPath = filePath.replace(/\.jpg$/i, '.webp');
+  // WebP: quality 70 for photos, 62 for hero
+  const webpQuality = isHero ? 62 : 70;
   const webpPipeline = metadata.width > maxWidth ? sharp(sourceBuffer).resize({ width: maxWidth }) : sharp(sourceBuffer);
-  const webpBuffer = await webpPipeline.webp({ quality: 76 }).toBuffer();
-  await writeWithRetry(webpPath, webpBuffer);
+  const webpBuffer = await webpPipeline.webp({ quality: webpQuality }).toBuffer();
+  await writeWithRetry(filePath.replace(/\.jpg$/i, '.webp'), webpBuffer);
   webpTotal += webpBuffer.length;
   console.log(`${file}: webp generado (${(webpBuffer.length / 1024).toFixed(0)} KB)`);
   await wait(200);
