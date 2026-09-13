@@ -33,7 +33,7 @@ h2 em { color: var(--accent); }
 em { font-weight: inherit; font-style: normal; }
 p { line-height: 1.75; }
 ::selection { background: #c5a584; color: #211a15; }
-.section-wrap { max-width: 1440px; margin: auto; padding-left: 6.2%; padding-right: 6.2%; }
+.section-wrap { max-width: 1600px; margin: auto; padding-left: 6.2%; padding-right: 6.2%; }
 .eyebrow { font-size: 13px; font-weight: 600; letter-spacing: 1.7px; line-height: 1.6; margin-bottom: 26px; color: #785638; }
 .reveal:has(.eyebrow) .eyebrow { display: block; text-align: center; margin-bottom: 16px; }
 .reveal:has(.eyebrow) h2 { position: relative; text-align: center; padding: 6px clamp(36px, 7vw, 92px); }
@@ -657,7 +657,7 @@ dialog .legal-pending { background: #ece3d6; padding: 16px; color: #5e4834; marg
 }
 
 /* ===== Subpáginas ===== */
-.wrap { max-width: 1200px; margin: auto; padding-left: 5.5%; padding-right: 5.5%; }
+.wrap { max-width: 1600px; margin: auto; padding-left: 5.5%; padding-right: 5.5%; }
 
 .site-header { position: sticky; top: 0; z-index: 20; background: var(--paper); border-bottom: 1px solid #ddd6cc70; }
 .site-header .header-inner { display: flex; align-items: center; justify-content: space-between; gap: 32px; min-height: 104px; padding-top: 14px; padding-bottom: 14px; position: relative; max-width: 1600px; margin: auto; padding-left: 4%; padding-right: 4%; }
