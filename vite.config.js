@@ -1,5 +1,5 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { readFileSync, readdirSync, readFileSync as rf, writeFileSync, unlinkSync, statSync } from 'node:fs';
+import { resolve, join } from 'node:path';
 import { defineConfig } from 'vite';
 
 const root = process.cwd();
@@ -17,9 +17,30 @@ function partials() {
   };
 }
 
+function inlineCss() {
+  return {
+    name: 'mm-parquet-inline-css',
+    apply: 'build',
+    closeBundle() {
+      const dist = resolve(root, 'dist');
+      const assetsDir = join(dist, 'assets');
+      const cssFile = readdirSync(assetsDir).find((file) => file.endsWith('.css'));
+      if (!cssFile) return;
+      const css = readFileSync(join(assetsDir, cssFile), 'utf8');
+      const htmlFiles = ['index.html', '404.html', 'galeria.html', 'servicios/index.html', 'trabajos/index.html', 'acabados/index.html', 'sobre-mm-parquet/index.html', 'preguntas-frecuentes/index.html', 'contacto/index.html'];
+      for (const file of htmlFiles) {
+        const filePath = join(dist, file);
+        const html = readFileSync(filePath, 'utf8');
+        writeFileSync(filePath, html.replace(/<link rel="stylesheet"[^>]*>/, () => `<style>${css}</style>`));
+      }
+      unlinkSync(join(assetsDir, cssFile));
+    },
+  };
+}
+
 export default defineConfig({
   appType: 'mpa',
-  plugins: [partials()],
+  plugins: [partials(), inlineCss()],
   build: {
     target: 'es2020',
     cssMinify: 'lightningcss',
