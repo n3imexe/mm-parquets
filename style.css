@@ -172,6 +172,7 @@ p { line-height: 1.75; }
 .project-copy > h2 { text-align: center; }
 .project-copy > .project-desc { margin-left: auto; margin-right: auto; text-align: center; }
 .project-desc { font-size: 17px; color: var(--muted); line-height: 1.7; margin-top: 18px; max-width: 420px; }
+.project-copy .text-link { display: inline-block; margin-top: 16px; }
 .project-facts { margin: 28px 0; }
 .project-facts > div { border-top: 1px solid var(--line); padding: 17px 0; }
 .project-facts dt { font-size: 12px; color: var(--muted); font-weight: 500; margin-bottom: 7px; }
@@ -257,6 +258,10 @@ dialog.photo-dialog { width: min(900px, calc(100% - 28px)); padding: 54px 26px 2
 .process-band-dark .process-services article > span::before { background: #dfb98e; }
 .process-band-dark .process-services h3 { color: #f0e6d6; }
 .process-band-dark .process-services p { color: #b8a896; }
+.process-band-dark .process-steps article { border-color: #3d3027; }
+.process-band-dark .process-steps article > span { color: #dfb98e; }
+.process-band-dark .process-steps h3 { color: #f0e6d6; }
+.process-band-dark .process-steps p { color: #b8a896; }
 .process-band-dark .text-link { color: #dfb98e; }
 .process { display: grid; grid-template-columns: 1fr 1.15fr; gap: 8%; padding-top: 90px; padding-bottom: 95px; }
 .process-intro { padding-top: 28px; }
