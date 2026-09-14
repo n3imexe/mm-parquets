@@ -105,7 +105,6 @@ p { line-height: 1.75; }
 .header-actions { display: flex; align-items: center; gap: 12px; }
 .menu-toggle, .nav-mobile-cta { display: none !important; }
 .hero { min-height: 100vh; min-height: 100svh; position: relative; background: #4f4538; color: white; isolation: isolate; overflow: hidden; display: flex; flex-direction: column; justify-content: center; padding-bottom: 60px; }
-.hero-mosaic { align-items: center; }
 /* Overlay global: mas oscuro a la izquierda (texto) y mas transparente a la derecha (mosaico visible). Ultimo stop coincide con .trust-band (#e9e1d5). */
 .hero::after {
   content: '';
