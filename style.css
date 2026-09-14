@@ -667,6 +667,8 @@ dialog .legal-pending { background: #ece3d6; padding: 16px; color: #5e4834; marg
 .site-nav > a:hover { color: #785638; }
 .site-nav > a:after { content: ''; position: absolute; bottom: 2px; left: 0; width: 0; height: 2px; background: var(--accent); transition: width .25s ease; }
 .site-nav > a:hover:after, .site-nav > a:focus-visible:after { width: 100%; }
+.site-nav > a[aria-current="page"] { color: #785638; }
+.site-nav > a[aria-current="page"]:after { width: 100%; }
 .nav-mobile-actions { display: none; }
 .header-phone { font-size: 15.5px; font-weight: 600; color: var(--dark); padding: 10px 0; transition: color .2s; white-space: nowrap; }
 .header-phone:hover { color: #785638; }

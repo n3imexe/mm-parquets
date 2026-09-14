@@ -32,6 +32,10 @@ window.matchMedia('(min-width: 801px)').addEventListener('change', (event) => {
 });
 $('#year').textContent = new Date().getFullYear();
 
+document.querySelectorAll('#navigation > a').forEach((link) => {
+  if (link.getAttribute('href') === window.location.pathname) link.setAttribute('aria-current', 'page');
+});
+
 const materials = {
   roble: { name: 'Roble natural', subtitle: 'Tono cálido que deja visible la veta.', tag: 'NATURAL', number: '01' },
   nogal: { name: 'Nogal cálido', subtitle: 'Tono oscuro para un contraste más marcado.', tag: 'OSCURO', number: '02' },
