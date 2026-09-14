@@ -290,6 +290,35 @@ if (projectCarousel && projectGroups.length > 0) {
   }, { passive: true });
 }
 
+// Hero: parallax sutil de la imagen de fondo al hacer scroll
+const heroMedia = document.querySelector('[data-hero-parallax]');
+if (heroMedia && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  const heroSection = heroMedia.closest('.hero');
+  let heroRafId = null;
+  const updateParallax = () => {
+    heroRafId = null;
+    if (window.scrollY > heroSection.offsetHeight) return;
+    const offset = Math.min(window.scrollY * 0.12, 40);
+    heroMedia.style.transform = `scale(1.08) translateY(${offset}px)`;
+  };
+  window.addEventListener('scroll', () => {
+    if (heroRafId) return;
+    heroRafId = requestAnimationFrame(updateParallax);
+  }, { passive: true });
+}
+
+// Oculta el boton flotante de WhatsApp cuando el footer es visible para no tapar sus enlaces
+const floatWhatsapp = document.querySelector('.float-whatsapp');
+const siteFooter = document.querySelector('.site-footer');
+if (floatWhatsapp && siteFooter && 'IntersectionObserver' in window) {
+  const footerObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      floatWhatsapp.classList.toggle('float-whatsapp-hidden', entry.isIntersecting);
+    });
+  }, { rootMargin: '0px 0px -40px 0px' });
+  footerObserver.observe(siteFooter);
+}
+
 // Sample carousel: auto-slide + dots
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const sampleCarousel = document.querySelector('.sample-carousel');
