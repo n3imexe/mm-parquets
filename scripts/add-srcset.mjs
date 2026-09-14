@@ -1,7 +1,8 @@
 import { readFile, writeFile } from 'node:fs/promises';
 
-// Anade srcset responsive (480w/960w) y sizes segun el contenedor de cada <source type="image/webp">.
-// Recorre el HTML linea a linea siguiendo la pila de clases de los contenedores abiertos.
+// Anade/actualiza srcset responsive (480w/640w/960w) y sizes segun el contenedor de cada
+// <source type="image/webp">. Recorre el HTML linea a linea siguiendo la pila de clases de
+// los contenedores abiertos. Es idempotente: puede relanzarse sobre HTML ya procesado.
 
 const files = ['index.html', 'trabajos/index.html', 'servicios/index.html', 'acabados/index.html', 'sobre-mm-parquet/index.html', 'contacto/index.html', 'preguntas-frecuentes/index.html'];
 
@@ -9,17 +10,16 @@ const CONTEXT_SIZES = [
   { match: 'hero', sizes: '100vw' },
   { match: 'project-thumbnails', sizes: '150px' },
   { match: 'project-feature', sizes: '(max-width: 800px) 100vw, 620px' },
-  { match: 'service-photo', sizes: '(max-width: 800px) 100vw, 480px' },
+  { match: 'service-photo', sizes: '(max-width: 800px) calc(88vw - 56px), 400px' },
   { match: 'sample-carousel', sizes: '(max-width: 800px) 60vw, 320px' },
   { match: 'work-mosaic', sizes: '(max-width: 800px) 50vw, 360px' },
   { match: 'compare-table', sizes: '(max-width: 800px) 50vw, 480px' },
-  { match: 'compare-slider', sizes: '(max-width: 800px) 100vw, 480px' },
+  { match: 'compare-slider', sizes: '(max-width: 800px) calc(88vw - 56px), 400px' },
   { match: 'visually-hidden', skip: true }, // galeria oculta: se carga entera al abrir el visor
   { match: 'material-display', sizes: '(max-width: 800px) 100vw, 640px' },
 ];
 const DEFAULT_SIZES = '(max-width: 800px) 100vw, 640px';
 
-const CLASS_RE = /class="([^"]+)"/g;
 const TAG_RE = /<\/?[a-zA-Z][^>]*>/g;
 
 for (const file of files) {
@@ -39,16 +39,18 @@ for (const file of files) {
       if (!isClose) {
         const classMatch = tag.match(/class="([^"]+)"/);
         stack.push(classMatch ? classMatch[1] : '');
-        if (tag.includes('type="image/webp"') && tag.includes('srcset="/fotos/')) {
-          // es un <source>: reescribe srcset segun contexto
-          const src = tag.match(/srcset="\/fotos\/([^"]+?)\.webp"/);
-          if (src && !tag.includes('sizes=')) {
+        if (tag.includes('type="image/webp"')) {
+          const srcsetMatch = tag.match(/srcset="([^"]+)"/);
+          const firstUrl = srcsetMatch ? srcsetMatch[1].split(',')[0].trim().split(' ')[0] : null;
+          const fileMatch = firstUrl ? firstUrl.match(/^\/fotos\/(.+?)(?:-(?:480|640|960)w)?\.webp$/) : null;
+          if (fileMatch) {
             const ctx = stack.filter(Boolean).join(' ');
             const rule = CONTEXT_SIZES.find((r) => ctx.includes(r.match));
             if (!rule?.skip) {
               const sizes = rule ? rule.sizes : DEFAULT_SIZES;
-              const base = src[1];
-              const newTag = tag.replace(/srcset="([^"]+)"/, `srcset="/fotos/${base}-480w.webp 480w, /fotos/${base}-960w.webp 960w, /fotos/${base}.webp 1440w" sizes="${sizes}"`);
+              const base = fileMatch[1];
+              let newTag = tag.replace(/srcset="[^"]+"/, `srcset="/fotos/${base}-480w.webp 480w, /fotos/${base}-640w.webp 640w, /fotos/${base}-960w.webp 960w, /fotos/${base}.webp 1440w"`);
+              newTag = newTag.includes('sizes=') ? newTag.replace(/sizes="[^"]*"/, `sizes="${sizes}"`) : newTag.replace(/srcset="[^"]+"/, (m) => `${m} sizes="${sizes}"`);
               result = result.replace(tag, newTag);
               changed++;
             }
