@@ -1,4 +1,6 @@
 import './style.css';
+import '@fontsource-variable/fraunces/standard.css';
+import '@fontsource-variable/fraunces/standard-italic.css';
 import { buildQuoteMessage, buildWhatsAppUrl } from './quote.js';
 
 const $ = (selector) => document.querySelector(selector);
