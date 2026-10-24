@@ -10,6 +10,20 @@ try {
   assert.match(galleryPage.url(), /\/trabajos\/$/, 'galeria.html debe redirigir a /trabajos/');
   await galleryPage.close();
   console.log('galeria.html redirects to /trabajos/.');
+  const workContext = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: 'reduce' });
+  const workPage = await workContext.newPage();
+  await workPage.goto(new URL('/trabajos/', process.env.TEST_URL || 'http://127.0.0.1:5173').href, { waitUntil: 'networkidle' });
+  await workPage.locator('#cookie-banner [data-cookie-decline]').click();
+  const materialPhotos = workPage.locator('[data-material-photo]');
+  assert.equal(await materialPhotos.count(), 5);
+  for (let index = 0; index < 5; index++) {
+    await materialPhotos.nth(index).click();
+    await workPage.locator('#viewer-image').evaluate((image) => image.decode());
+    assert.equal(await workPage.locator('#dialog-title').textContent(), await materialPhotos.nth(index).getAttribute('data-caption'));
+    assert.match(await workPage.locator('.viewer-note').textContent(), /no son instalaciones terminadas/);
+    await workPage.keyboard.press('Escape');
+  }
+  await workContext.close();
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
@@ -147,7 +161,7 @@ try {
   assert.equal(mobileViewerAxe.violations.length, 0, JSON.stringify(mobileViewerAxe.violations.map((v) => v.id)));
   await page.keyboard.press('Escape');
   assert.deepEqual(errors, []);
-  console.log('Verified: location labels removed, nine local photos, project thumbnails, five sample viewers, photo keyboard navigation and focus restoration, preserved tone selector, valid anchors, quote form, legal dialogs, minimum 16px body text, nine viewport widths, desktop/mobile/dialog accessibility, no JavaScript errors.');
+  console.log('Verified: routes, local photos, project thumbnails, five sample and five material viewers, photo keyboard navigation and focus restoration, preserved tone selector, valid anchors, quote form, legal dialogs, minimum 16px body text, nine viewport widths, desktop/mobile/dialog accessibility, no JavaScript errors.');
 } finally {
   await browser.close();
 }
